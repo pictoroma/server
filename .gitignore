@@ -1,0 +1,7 @@
+/.data
+/bundle
+/.env
+/.yarn
+/node_modules
+/dist
+/*.log

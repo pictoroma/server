@@ -1,0 +1,7 @@
+/node_modules
+/.yarn
+/.env
+/.data
+/bundle
+/dist
+/docker-compose.yml
