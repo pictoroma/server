@@ -22,6 +22,8 @@ import { PostResolver } from './resolvers/posts';
 import { MediaResolver } from './resolvers/media';
 import { PushRegistrationModel } from './models/push-registration';
 import { PushRegistrationResolver } from './resolvers/push-registration';
+import { CommentResolver } from './resolvers/comments';
+import { CommentModel } from './models/comment';
 
 const start = async () => {
   const container = new ContainerInstance('main');
@@ -48,6 +50,7 @@ const start = async () => {
       PostModel,
       MediaModel,
       PushRegistrationModel,
+      CommentModel,
     ],
   });
 
@@ -69,6 +72,7 @@ const start = async () => {
       PostResolver,
       MediaResolver,
       PushRegistrationResolver,
+      CommentResolver,
     ],
     container,
   })

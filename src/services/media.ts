@@ -61,6 +61,12 @@ class MediaService {
     return fs.createReadStream(thumbLocation);
   }
 
+  public remove = async (id: string, user: UserModel) => {
+    await this.#mediaRepo.delete({ id });
+    const location = path.join(this.#config.imageLocation, id);
+    await fs.rmdir(location);
+  }
+
   public getMediaSteam = async (id: string) => {
     const media = await this.getById(id);
     if (!media) {
@@ -72,7 +78,7 @@ class MediaService {
     return fs.createReadStream(originalLocation);
   }
 
-  public create = async (file: fileUpload.UploadedFile, user: UserModel) => {
+  public create = async (file: fileUpload.UploadedFile, order: number | undefined, user: UserModel) => {
     const id = nanoid();
     const location = path.join(this.#config.imageLocation, id);
     const originalLocation = path.join(location, file.name);
@@ -91,6 +97,8 @@ class MediaService {
       contentType: file.mimetype,
       filename: file.name,
       creator: user,
+      order,
+      created: new Date(),
       size: stats.size,  
       aspect: (metadata.width || 1) / (metadata.height || 1),
     });

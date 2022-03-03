@@ -16,7 +16,11 @@ const createApi = (container: ContainerInstance) => {
   const userService = container.get(UserService);
 
   app.use(cors({
-    allowedHeaders: 'authorization',
+    credentials: true,
+    origin: (origin, callback) => {
+      callback(null, origin);
+    },
+    allowedHeaders: 'authorization,content-type',
   }));
 
   app.post('/authorize', bodyParser.json(), asyncEndpoint(async (req, res) => {
@@ -72,7 +76,7 @@ const createApi = (container: ContainerInstance) => {
     }
     const mediaList = Array.isArray(media) ? media : [media];
     const ids = await Promise.all(mediaList.map(async (item) => {
-      const file = await mediaService.create(item, req.user! as any);
+      const file = await mediaService.create(item, 0, req.user! as any);
       return file.id;
     }))
     res.json({

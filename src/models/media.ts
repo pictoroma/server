@@ -41,6 +41,14 @@ class MediaModel {
   @Field({ nullable: true })
   public filename?: string;
 
+  @Column({ name: 'order', nullable: true })
+  @Field({ nullable: true })
+  public order?: number;
+
+  @Column({ name: 'created_at', nullable: true })
+  @Field({ nullable: true })
+  public created?: Date;
+
   @Column({
     name: 'type',
     type: 'simple-enum',

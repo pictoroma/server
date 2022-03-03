@@ -8,6 +8,7 @@ import { FeedModel } from "../models/feed";
 import { MediaModel } from "../models/media";
 import { PostModel } from "../models/post";
 import { UserModel } from "../models/user";
+import { MediaService } from "./media";
 
 @InputType()
 class PostFindParameters {
@@ -40,10 +41,12 @@ class PostCreateParameters {
 class PostService {
   #postRepo: Repository<PostModel>;
   #mediaRepo: Repository<MediaModel>;
+  #mediaService: MediaService;
   #feedRepo: Repository<FeedModel>;
   #logger: winston.Logger;
 
-  constructor(connection: Connection, config: Config) {
+  constructor(connection: Connection, config: Config, mediaService: MediaService) {
+    this.#mediaService = mediaService;
     this.#postRepo = connection.getRepository(PostModel);
     this.#mediaRepo = connection.getRepository(MediaModel);
     this.#feedRepo = connection.getRepository(FeedModel);
@@ -73,6 +76,23 @@ class PostService {
     return post;
   }
 
+  public remove = async (id: string, user: UserModel) => {
+    const current = await this.get(id, user, ['creator', 'media']);
+    if (current?.creator.id !== user.id) {
+      throw new Error('post not created by user');
+    }
+    await Promise.all(current.media.map(async (media) => {
+      await this.#mediaService.remove(media.id, user);
+    }))
+
+    await this.#postRepo.delete({ id });
+  }
+
+  public get = async (id: string, user: UserModel, relations?: string[]) => {
+    const post = await this.#postRepo.findOne({ id }, { relations });
+    return post;
+  }
+
   public getMedia = async (id: string) => {
     this.#logger.debug('getting media', { id })
     const post = await this.#postRepo.findOne({ id }, {
@@ -93,6 +113,17 @@ class PostService {
       return undefined;
     }
     return post.creator;
+  }
+
+  public getComments = async (id: string) => {
+    this.#logger.debug('getting comments', { id })
+    const post = await this.#postRepo.findOne({ id }, {
+      relations: ['comments'],
+    });
+    if (!post) {
+      return undefined;
+    }
+    return post.comments;
   }
 
   public find = async (filter: PostFindParameters, user: UserModel) => {

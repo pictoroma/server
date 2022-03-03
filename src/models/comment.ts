@@ -17,14 +17,14 @@ class CommentModel {
     () => UserModel,
   )
   @JoinColumn({ name: 'creator_id' })
-  @Field()
+  @Field(() => UserModel)
   public creator!: UserModel;
 
   @ManyToOne(
     () => PostModel,
   )
   @JoinColumn({ name: 'post_id' })
-  @Field()
+  @Field(() => PostModel)
   public post!: PostModel;
 
   @Column({ name: 'created_at' })
