@@ -1,7 +1,10 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import * as tableNames from '../db/table-names';
-import { UserFeedRelationModel } from './user-feed-relation';
+import {
+  UserFeedAccessType,
+  UserFeedRelationModel,
+} from './user-feed-relation';
 
 @Entity({ name: tableNames.USERS })
 @ObjectType()
@@ -32,12 +35,20 @@ class UserModel {
   @Field({ nullable: true })
   public avatar?: string;
 
-  @OneToMany(
-    () => UserFeedRelationModel,
-    (relation) => relation.user,
-  )
+  @OneToMany(() => UserFeedRelationModel, relation => relation.user)
   @Field(() => [UserFeedRelationModel])
   public feeds!: UserFeedRelationModel[];
+
+  public hasAccessToFeed = (id: string, accessTypes?: UserFeedAccessType[]) => {
+    const access = this.feeds.find(feed => feed.feed.id === id);
+    if (!access) {
+      return false;
+    }
+    if (accessTypes) {
+      return accessTypes.includes(access.accessType);
+    }
+    return true;
+  };
 }
 
 export { UserModel };

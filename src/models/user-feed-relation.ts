@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import * as tableNames from '../db/table-names';
 import { UserModel } from './user';
@@ -14,23 +14,15 @@ enum UserFeedAccessType {
 @Entity({ name: tableNames.USER_FEED_RELATIONS })
 @ObjectType()
 class UserFeedRelationModel {
-  @ManyToOne(
-    () => UserModel,
-    (user) => user.id,
-    { primary: true },
-  )
+  @ManyToOne(() => UserModel, user => user.id, { primary: true })
   @JoinColumn({ name: 'user_id' })
   @Field(() => UserModel)
   public user!: UserModel;
 
-  @ManyToOne(
-    () => FeedModel,
-    (feed) => feed.id,
-    { primary: true },
-  )
+  @ManyToOne(() => FeedModel, feed => feed.id, { primary: true })
   @JoinColumn({ name: 'feed_id' })
   @Field(() => FeedModel)
-  public feed!: FeedModel
+  public feed!: FeedModel;
 
   @Field()
   @Column({

@@ -1,7 +1,7 @@
-import { UserModel } from "../models/user";
+import { UserModel } from '../models/user';
 
 type Context = {
-  user?: UserModel
-}
+  user?: UserModel;
+};
 
 export { Context };

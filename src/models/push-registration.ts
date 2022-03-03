@@ -1,6 +1,6 @@
-import { Field, ObjectType } from "type-graphql";
-import { Column, Entity, JoinColumn, JoinTable, ManyToOne, PrimaryColumn } from "typeorm";
-import { UserModel } from "./user";
+import { Field, ObjectType } from 'type-graphql';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { UserModel } from './user';
 import * as tableNames from '../db/table-names';
 
 @Entity({ name: tableNames.PUSH_REGISTRATIONS })

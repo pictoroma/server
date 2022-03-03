@@ -15,17 +15,11 @@ class FeedModel {
   @Field()
   public name!: string;
 
-  @OneToMany(
-    () => UserFeedRelationModel,
-    (relation) => relation.feed,
-  )
+  @OneToMany(() => UserFeedRelationModel, relation => relation.feed)
   @Field(() => [UserFeedRelationModel])
   public users!: UserFeedRelationModel[];
 
-  @OneToMany(
-    () => PostModel,
-    (post) => post.id,
-  )
+  @OneToMany(() => PostModel, post => post.id)
   @Field(() => [PostModel])
   public posts!: PostModel;
 }

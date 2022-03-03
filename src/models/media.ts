@@ -1,4 +1,12 @@
-import { Entity, Column, JoinTable, ManyToMany, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  JoinTable,
+  ManyToMany,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import * as tableNames from '../db/table-names';
 import { PostModel } from './post';
@@ -62,13 +70,13 @@ class MediaModel {
   @JoinTable({
     name: tableNames.POST_MEDIA_RELATIONS,
     joinColumn: {
-      name: "media_id",
-      referencedColumnName: "id"
+      name: 'media_id',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: "post_id",
-      referencedColumnName: "id"
-    }
+      name: 'post_id',
+      referencedColumnName: 'id',
+    },
   })
   public posts!: PostModel[];
 }

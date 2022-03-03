@@ -11,14 +11,9 @@ class Config {
   constructor() {
     this.#logger = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',
-      transports: [
-        new winston.transports.Console(),
-      ],
+      transports: [new winston.transports.Console()],
     });
-    this.#configLogger = this.createLogger(
-      'core',
-      'config',
-    );
+    this.#configLogger = this.createLogger('core', 'config');
   }
 
   get emailFrom() {
@@ -37,10 +32,10 @@ class Config {
 
     return {
       host,
-      port: port ? parseInt(port) : undefined,
+      port: port ? parseInt(port, 10) : undefined,
       username,
       password,
-    }
+    };
   }
 
   get logger() {
@@ -57,7 +52,7 @@ class Config {
       if (!fs.existsSync(secretLocation)) {
         this.#configLogger.info('creating JWT secret', {
           location: secretLocation,
-        })
+        });
         fs.mkdirpSync(this.dataLocation);
         const secret = crypto.randomBytes(64).toString('hex');
         fs.writeFileSync(secretLocation, secret, 'utf-8');
@@ -86,7 +81,7 @@ class Config {
       type,
       name,
     });
-  }
+  };
 }
 
 export { Config };

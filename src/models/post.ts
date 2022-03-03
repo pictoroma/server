@@ -1,4 +1,13 @@
-import { JoinTable, Entity, Column, PrimaryColumn, ManyToOne, ManyToMany, JoinColumn, OneToMany } from 'typeorm';
+import {
+  JoinTable,
+  Entity,
+  Column,
+  PrimaryColumn,
+  ManyToOne,
+  ManyToMany,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { ObjectType, Field } from 'type-graphql';
 import * as tableNames from '../db/table-names';
 import { UserModel } from './user';
@@ -16,12 +25,12 @@ class PostModel {
   @ManyToOne(() => UserModel)
   @JoinColumn({ name: 'creator_id' })
   @Field(() => UserModel, { nullable: true })
-  public creator!: UserModel
+  public creator!: UserModel;
 
   @ManyToOne(() => FeedModel)
   @JoinColumn({ name: 'feed_id' })
   @Field(() => FeedModel)
-  public feed!: FeedModel 
+  public feed!: FeedModel;
 
   @Column({ name: 'created_at' })
   @Field()
@@ -34,10 +43,7 @@ class PostModel {
   @Field()
   public commentCount!: number;
 
-  @OneToMany(
-    () => CommentModel,
-    (comment) => comment.post,
-  )
+  @OneToMany(() => CommentModel, comment => comment.post)
   @Field(() => [CommentModel])
   public comments!: CommentModel[];
 
@@ -45,13 +51,13 @@ class PostModel {
   @JoinTable({
     name: 'post_media_relations',
     joinColumn: {
-      name: "post_id",
-      referencedColumnName: "id"
+      name: 'post_id',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: "media_id",
-      referencedColumnName: "id"
-    }
+      name: 'media_id',
+      referencedColumnName: 'id',
+    },
   })
   @Field(() => [MediaModel])
   public media!: MediaModel[];

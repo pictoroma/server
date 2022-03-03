@@ -13,16 +13,12 @@ class CommentModel {
   @Field()
   public id!: string;
 
-  @ManyToOne(
-    () => UserModel,
-  )
+  @ManyToOne(() => UserModel)
   @JoinColumn({ name: 'creator_id' })
   @Field(() => UserModel)
   public creator!: UserModel;
 
-  @ManyToOne(
-    () => PostModel,
-  )
+  @ManyToOne(() => PostModel)
   @JoinColumn({ name: 'post_id' })
   @Field(() => PostModel)
   public post!: PostModel;
@@ -30,7 +26,6 @@ class CommentModel {
   @Column({ name: 'created_at' })
   @Field()
   public created!: Date;
-
 
   @Column({ name: 'content' })
   @Field()

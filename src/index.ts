@@ -34,7 +34,7 @@ const start = async () => {
 
   logger.debug('ensure data directory exists', {
     location: config.dataLocation,
-  })
+  });
   await fs.mkdirp(config.dataLocation);
 
   logger.debug('create db connection');
@@ -75,7 +75,7 @@ const start = async () => {
       CommentResolver,
     ],
     container,
-  })
+  });
 
   logger.debug('creating GraphQL server');
   const server = new ApolloServer({
@@ -84,13 +84,13 @@ const start = async () => {
     context: async ({ req }) => {
       const authorization = req.header('authorization');
       if (authorization) {
-        const [,token] = authorization.split(' ');
+        const [, token] = authorization.split(' ');
         const userService = container.get(UserService);
         const user = await userService.getUserFromToken(token);
         return { user, req };
       }
-      return { req }
-    }
+      return { req };
+    },
   });
   await server.start();
 
@@ -104,6 +104,6 @@ const start = async () => {
   await new Promise<void>(r => app.listen({ port: 4000 }, r));
 
   logger.info('server has started');
-}
+};
 
 start().catch(console.error);

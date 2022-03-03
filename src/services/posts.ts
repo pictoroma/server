@@ -1,14 +1,15 @@
-import { nanoid } from "nanoid";
-import { Field, InputType } from "type-graphql";
-import { Service } from "typedi";
-import { Connection, Repository } from "typeorm";
-import winston from "winston";
-import { Config } from "../config";
-import { FeedModel } from "../models/feed";
-import { MediaModel } from "../models/media";
-import { PostModel } from "../models/post";
-import { UserModel } from "../models/user";
-import { MediaService } from "./media";
+import { nanoid } from 'nanoid';
+import { Field, InputType } from 'type-graphql';
+import { Service } from 'typedi';
+import { Connection, Repository } from 'typeorm';
+import winston from 'winston';
+import { Config } from '../config';
+import { FeedModel } from '../models/feed';
+import { MediaModel } from '../models/media';
+import { PostModel } from '../models/post';
+import { UserModel } from '../models/user';
+import { UserFeedAccessType } from '../models/user-feed-relation';
+import { MediaService } from './media';
 
 @InputType()
 class PostFindParameters {
@@ -45,7 +46,11 @@ class PostService {
   #feedRepo: Repository<FeedModel>;
   #logger: winston.Logger;
 
-  constructor(connection: Connection, config: Config, mediaService: MediaService) {
+  constructor(
+    connection: Connection,
+    config: Config,
+    mediaService: MediaService
+  ) {
     this.#mediaService = mediaService;
     this.#postRepo = connection.getRepository(PostModel);
     this.#mediaRepo = connection.getRepository(MediaModel);
@@ -58,7 +63,14 @@ class PostService {
     this.#logger.debug('creating post', { id, params, user });
     const media = await this.#mediaRepo.findByIds(params.media);
     const feed = await this.#feedRepo.findOne({ id: params.feed });
-    if (!feed) {
+    if (
+      !feed ||
+      !user.hasAccessToFeed(feed.id, [
+        UserFeedAccessType.Moderator,
+        UserFeedAccessType.Admin,
+        UserFeedAccessType.Writer,
+      ])
+    ) {
       this.#logger.debug('feed not found', params.feed);
       throw new Error('Feed not found');
     }
@@ -74,61 +86,85 @@ class PostService {
 
     this.#logger.debug('post created', { id });
     return post;
-  }
+  };
 
   public remove = async (id: string, user: UserModel) => {
     const current = await this.get(id, user, ['creator', 'media']);
     if (current?.creator.id !== user.id) {
       throw new Error('post not created by user');
     }
-    await Promise.all(current.media.map(async (media) => {
-      await this.#mediaService.remove(media.id, user);
-    }))
+    await Promise.all(
+      current.media.map(async media => {
+        await this.#mediaService.remove(media.id, user);
+      })
+    );
 
     await this.#postRepo.delete({ id });
-  }
+  };
 
-  public get = async (id: string, user: UserModel, relations?: string[]) => {
-    const post = await this.#postRepo.findOne({ id }, { relations });
+  public get = async (
+    id: string,
+    user: UserModel,
+    relations: string[] = []
+  ) => {
+    const post = await this.#postRepo.findOne(
+      { id },
+      { relations: [...relations, 'feed'] }
+    );
+    if (!post || !user.hasAccessToFeed(post.feed.id)) {
+      return undefined;
+    }
     return post;
-  }
+  };
 
   public getMedia = async (id: string) => {
-    this.#logger.debug('getting media', { id })
-    const post = await this.#postRepo.findOne({ id }, {
-      relations: ['media'],
-    });
+    this.#logger.debug('getting media', { id });
+    const post = await this.#postRepo.findOne(
+      { id },
+      {
+        relations: ['media'],
+      }
+    );
     if (!post) {
       return [];
     }
     return post.media;
-  }
+  };
 
   public getCreator = async (id: string) => {
-    this.#logger.debug('getting creator', { id })
-    const post = await this.#postRepo.findOne({ id }, {
-      relations: ['creator'],
-    });
+    this.#logger.debug('getting creator', { id });
+    const post = await this.#postRepo.findOne(
+      { id },
+      {
+        relations: ['creator'],
+      }
+    );
     if (!post) {
       return undefined;
     }
     return post.creator;
-  }
+  };
 
   public getComments = async (id: string) => {
-    this.#logger.debug('getting comments', { id })
-    const post = await this.#postRepo.findOne({ id }, {
-      relations: ['comments'],
-    });
+    this.#logger.debug('getting comments', { id });
+    const post = await this.#postRepo.findOne(
+      { id },
+      {
+        relations: ['comments'],
+      }
+    );
     if (!post) {
       return undefined;
     }
     return post.comments;
-  }
+  };
 
   public find = async (filter: PostFindParameters, user: UserModel) => {
-    this.#logger.debug('searching', { filter, user })
-    if (filter.feeds && filter.feeds.find(f => !user.feeds.find(u => u.feed.id === f))) {
+    this.#logger.debug('searching', { filter, user });
+    if (
+      filter.feeds &&
+      filter.feeds.find(f => !user.feeds.find(u => u.feed.id === f))
+    ) {
       throw new Error('Unauthroized');
     }
     let query = this.#postRepo.createQueryBuilder('post');
@@ -149,7 +185,7 @@ class PostService {
     }
     query = query.orderBy('post.created_at', 'DESC');
     return query.getMany();
-  }
+  };
 }
 
 export { PostCreateParameters, PostFindParameters, PostService };

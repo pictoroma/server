@@ -1,7 +1,7 @@
-import { AuthenticationError } from "apollo-server-express";
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { AuthenticationError } from 'apollo-server-express';
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
-import { UserModel } from "../models/user";
+import { UserModel } from '../models/user';
 import { UserService } from '../services/users';
 import { Context } from '../types/context';
 
@@ -15,9 +15,7 @@ class UserResolver {
   }
 
   @Query(() => UserModel, { nullable: true })
-  public async profile(
-    @Ctx() { user }: Context,
-  ) {
+  public async profile(@Ctx() { user }: Context) {
     return user;
   }
 
@@ -30,34 +28,28 @@ class UserResolver {
   @Mutation(() => String)
   public async createAuthToken(
     @Arg('username', () => String) username: string,
-    @Arg('secret', () => String) secret: string,
+    @Arg('secret', () => String) secret: string
   ) {
-    const token = await this.#userService.createAuthToken(
-      username,
-      secret,
-    );
+    const token = await this.#userService.createAuthToken(username, secret);
     return token;
   }
 
   @Mutation(() => UserModel)
   public async setProfileAvatar(
     @Ctx() { user }: Context,
-    @Arg('mediaId', () => String, { nullable: true }) mediaId?: string,
+    @Arg('mediaId', () => String, { nullable: true }) mediaId?: string
   ) {
     if (!user) {
       throw new AuthenticationError('unauthorized');
     }
-    const updatedUser = await this.#userService.setAvatar(
-      mediaId,
-      user,
-    );
+    const updatedUser = await this.#userService.setAvatar(mediaId, user);
     return updatedUser;
   }
 
   @Mutation(() => UserModel)
   public async inviteProfile(
     @Ctx() { user }: Context,
-    @Arg('email', () => String) email: string,
+    @Arg('email', () => String) email: string
   ) {
     if (!user) {
       throw new AuthenticationError('unauthorized');

@@ -13,16 +13,20 @@ class EmailService {
     this.#config = config;
     this.#logger = config.createLogger('service', 'email');
     const smtp = config.smtp;
-    if (!smtp) return;
+    if (!smtp) {
+      return;
+    }
     this.#tranporter = nodemailer.createTransport({
       host: smtp.host,
       port: smtp.port,
       secure: smtp.port === 465,
-      auth: smtp.username ? {
-        user: smtp.username,
-        pass: smtp.password,
-      } : undefined,
-    })
+      auth: smtp.username
+        ? {
+            user: smtp.username,
+            pass: smtp.password,
+          }
+        : undefined,
+    });
   }
 
   public send = async (to: string, subject: string, body: string) => {
@@ -35,7 +39,7 @@ class EmailService {
         from,
       });
       return;
-    } 
+    }
 
     this.#logger.debug('sending email', {
       to,
@@ -51,7 +55,7 @@ class EmailService {
     });
 
     return info;
-  }
+  };
 }
 
 export { EmailService };
