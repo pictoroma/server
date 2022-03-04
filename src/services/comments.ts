@@ -75,6 +75,10 @@ class CommentService {
     }
     return comment.creator;
   };
+
+  public remove = async (id: string) => {
+    await this.#commentRepo.delete({ id });
+  }
 }
 
 export { CommentCreateParameters, CommentService };

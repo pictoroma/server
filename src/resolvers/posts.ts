@@ -100,6 +100,18 @@ class PostResolver {
     const post = await this.#postService.create(params, user);
     return post;
   }
+
+  @Mutation(() => Boolean)
+  public async removePost(
+    @Arg('id', () => String) id: string,
+    @Ctx() { user }: Context
+  ) {
+    if (!user) {
+      throw new AuthenticationError('Unauthorized');
+    }
+    await this.#postService.remove(id, user);
+    return true;
+  }
 }
 
 export { PostResolver };

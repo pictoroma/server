@@ -1,4 +1,5 @@
 import { Service } from 'typedi';
+import rimraf from 'rimraf';
 import path from 'path';
 import sharp from 'sharp';
 import fs from 'fs-extra';
@@ -67,7 +68,7 @@ class MediaService {
   public remove = async (id: string, user: UserModel) => {
     await this.#mediaRepo.delete({ id });
     const location = path.join(this.#config.imageLocation, id);
-    await fs.rmdir(location);
+    rimraf(location, () => {});
   };
 
   public getMediaSteam = async (id: string) => {

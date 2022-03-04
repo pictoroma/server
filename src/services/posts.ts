@@ -9,6 +9,7 @@ import { MediaModel } from '../models/media';
 import { PostModel } from '../models/post';
 import { UserModel } from '../models/user';
 import { UserFeedAccessType } from '../models/user-feed-relation';
+import { CommentService } from './comments';
 import { MediaService } from './media';
 
 @InputType()
@@ -43,15 +44,18 @@ class PostService {
   #postRepo: Repository<PostModel>;
   #mediaRepo: Repository<MediaModel>;
   #mediaService: MediaService;
+  #commentService: CommentService;
   #feedRepo: Repository<FeedModel>;
   #logger: winston.Logger;
 
   constructor(
     connection: Connection,
     config: Config,
-    mediaService: MediaService
+    mediaService: MediaService,
+    commentService: CommentService
   ) {
     this.#mediaService = mediaService;
+    this.#commentService = commentService;
     this.#postRepo = connection.getRepository(PostModel);
     this.#mediaRepo = connection.getRepository(MediaModel);
     this.#feedRepo = connection.getRepository(FeedModel);
@@ -89,13 +93,27 @@ class PostService {
   };
 
   public remove = async (id: string, user: UserModel) => {
-    const current = await this.get(id, user, ['creator', 'media']);
+    const current = await this.get(id, user, ['creator', 'media', 'comments']);
     if (current?.creator.id !== user.id) {
       throw new Error('post not created by user');
     }
     await Promise.all(
+      current.comments.map(async comment => {
+        try {
+          await this.#commentService.remove(comment.id);
+        } catch (err) { }
+      })
+    );
+    await this.#postRepo.save({
+      ...current,
+      media: [],
+      comments: [],
+    });
+    await Promise.all(
       current.media.map(async media => {
-        await this.#mediaService.remove(media.id, user);
+        try {
+          await this.#mediaService.remove(media.id, user);
+        } catch (err) { }
       })
     );
 
