@@ -3086,6 +3086,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-server-sdk@npm:^3.6.0":
+  version: 3.6.0
+  resolution: "expo-server-sdk@npm:3.6.0"
+  dependencies:
+    node-fetch: ^2.6.0
+    promise-limit: ^2.7.0
+  checksum: cd155ff020ad069dbd23e10807ad593f1d3c86b5ac9b3bacc76626e6cdb26ee76c5943ebcefab5a4a464f1654a08d97a3cc64d17b1cb6631a93c7030848da2f2
+  languageName: node
+  linkType: hard
+
 "express-fileupload@npm:^1.3.1":
   version: 1.3.1
   resolution: "express-fileupload@npm:1.3.1"
@@ -5173,7 +5183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.5, node-fetch@npm:^2.6.7":
+"node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.5, node-fetch@npm:^2.6.7":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
   dependencies:
@@ -5856,6 +5866,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"promise-limit@npm:^2.7.0":
+  version: 2.7.0
+  resolution: "promise-limit@npm:2.7.0"
+  checksum: 3e20a46d752ab41c921feceb668b3a6d000438573e71342d42bf63373fdbafbf4b6a3f88ef5ff902a2a37be28152dc74e618e863134fd4c08c196448f4a6d28f
+  languageName: node
+  linkType: hard
+
 "promise-retry@npm:^2.0.1":
   version: 2.0.1
   resolution: "promise-retry@npm:2.0.1"
@@ -6426,6 +6443,7 @@ __metadata:
     commander: ^9.0.0
     cors: ^2.8.5
     eslint: ^7
+    expo-server-sdk: ^3.6.0
     express: ^4.17.2
     express-fileupload: ^1.3.1
     express-jwt: ^6.1.0

@@ -14,6 +14,7 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAIL_FROM=${EMAIL_FROM}
       - LOG_LEVEL=verbose
+      - EXPO_ACCESS_TOKEN=${EXPO_ACCESS_TOKEN}
     volumes:
       - "$FAST_STORAGE/olli/data:/data"
     networks:

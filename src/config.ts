@@ -16,6 +16,14 @@ class Config {
     this.#configLogger = this.createLogger('core', 'config');
   }
 
+  get expoAccessToken() {
+    return process.env.EXPO_ACCESS_TOKEN;
+  }
+
+  get url() {
+    return process.env.URL;
+  }
+
   get emailFrom() {
     return process.env.EMAIL_FROM;
   }

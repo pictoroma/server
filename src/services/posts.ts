@@ -11,6 +11,7 @@ import { UserModel } from '../models/user';
 import { UserFeedAccessType } from '../models/user-feed-relation';
 import { CommentService } from './comments';
 import { MediaService } from './media';
+import { PushRegistrationService } from './push-registrations';
 
 @InputType()
 class PostFindParameters {
@@ -45,6 +46,7 @@ class PostService {
   #mediaRepo: Repository<MediaModel>;
   #mediaService: MediaService;
   #commentService: CommentService;
+  #pushRegistrationService: PushRegistrationService;
   #feedRepo: Repository<FeedModel>;
   #logger: winston.Logger;
 
@@ -52,8 +54,10 @@ class PostService {
     connection: Connection,
     config: Config,
     mediaService: MediaService,
-    commentService: CommentService
+    commentService: CommentService,
+    pushRegistrationService: PushRegistrationService,
   ) {
+    this.#pushRegistrationService = pushRegistrationService;
     this.#mediaService = mediaService;
     this.#commentService = commentService;
     this.#postRepo = connection.getRepository(PostModel);
@@ -87,6 +91,12 @@ class PostService {
       feed,
       media,
     });
+
+    this.#pushRegistrationService.sendToFeed(
+      feed.id,
+      `New post in ${feed.name}`,
+      user,
+    );
 
     this.#logger.debug('post created', { id });
     return post;

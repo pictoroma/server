@@ -82,11 +82,31 @@ class UserService {
     invitedUser.username = email;
     invitedUser.admin = false;
     invitedUser.creationToken = nanoid();
-    const link = `pictoroma://AcceptInvitation?inviteCode=${invitedUser.creationToken}`;
+    const senderName = user.name || user.username;
+    const inviteCode = Buffer.from(JSON.stringify({
+      domain: this.#config.url,
+      creationToken: invitedUser.creationToken,
+    })).toString('base64');
+    const link = `pictoroma://AcceptInvitation?inviteCode=${inviteCode}`;
     await this.#emailService.send(
       email,
-      'Invitation',
-      `Install Pictoroma and click <a href="${link}">here</a> or copy paste ${link}`
+      `${senderName} has invited you to join pictoroma`,
+      `
+  <h1>You have been invited!</h1>
+
+  <p>${senderName} has invited you to their Pictoroma server at ${this.#config.url}</p>
+  <p>
+  To accept the invitation start by installing the pictoroma app for <a href="https://apps.apple.com/us/app/pictoroma/id1610213341">iOS</a> or <a href="https://play.google.com/store/apps/details?id=pro.mortenolsen.olli">Android</a>
+  </p>
+
+  <p>
+      Click <a href="${link}">this link</a> or copy paste ${link} into you phones browser to accept the invitation.
+  </p>
+  <p>
+    Pick your username and you are in!
+  </p>`
+
+
     );
     return this.#userRepo.save(invitedUser);
   };

@@ -1,13 +1,19 @@
 import { AuthenticationError } from 'apollo-server-express';
-import { nanoid } from 'nanoid';
 import { Ctx, Arg, Mutation, Resolver } from 'type-graphql';
 import { Service } from 'typedi';
 import { PushRegistrationModel } from '../models/push-registration';
+import { PushRegistrationService } from '../services/push-registrations';
 import { Context } from '../types/context';
 
 @Resolver(() => PushRegistrationModel)
 @Service()
 class PushRegistrationResolver {
+  #pushRegistrationService: PushRegistrationService;
+
+  constructor(pushRegistrationService: PushRegistrationService) {
+    this.#pushRegistrationService = pushRegistrationService;
+  }
+
   @Mutation(() => PushRegistrationModel)
   public async registerPushNotification(
     @Arg('token', () => String) token: string,
@@ -16,10 +22,7 @@ class PushRegistrationResolver {
     if (!user) {
       throw new AuthenticationError('unauthorized');
     }
-    const registartion = new PushRegistrationModel();
-    registartion.id = nanoid();
-    registartion.user = user;
-    registartion.token = token;
+    const registartion = await this.#pushRegistrationService.update(token, user);
     return registartion;
   }
 }
