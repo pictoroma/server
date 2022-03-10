@@ -24,6 +24,6 @@ services:
       - URL=http://localhost:4000
     volumes:
       - "./data:/data"
-    ports
+    ports:
       - "4000:4000"
 ```
