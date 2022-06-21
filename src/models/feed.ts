@@ -22,6 +22,10 @@ class FeedModel {
   @OneToMany(() => PostModel, post => post.id)
   @Field(() => [PostModel])
   public posts!: PostModel;
+
+  @Column({ name: 'removed', nullable: true })
+  @Field({ nullable: true })
+  public removed?: Date;
 }
 
 export { FeedModel };

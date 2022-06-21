@@ -30,6 +30,10 @@ class CommentModel {
   @Column({ name: 'content' })
   @Field()
   public content!: string;
+
+  @Column({ name: 'removed', nullable: true })
+  @Field({ nullable: true })
+  public removed?: Date;
 }
 
 export { CommentModel };

@@ -1,6 +1,7 @@
+import { AuthenticationError } from 'apollo-server-express';
 import { nanoid } from 'nanoid';
 import { Service } from 'typedi';
-import { Connection, Repository } from 'typeorm';
+import { Connection, IsNull, Repository } from 'typeorm';
 import { FeedModel } from '../models/feed';
 import { UserModel } from '../models/user';
 import {
@@ -24,7 +25,10 @@ class FeedService {
   }
 
   public getFeedById = async (id: string, user: UserModel) => {
-    const feed = await this.#feedRepo.findOne({ id });
+    const feed = await this.#feedRepo.findOne({
+      id,
+      removed: IsNull(),
+    });
     if (!feed || !user.hasAccessToFeed(feed.id)) {
       return undefined;
     }
@@ -38,7 +42,7 @@ class FeedService {
         relations: ['users', 'users.user'],
       }
     );
-    if (!feed || !user.hasAccessToFeed(feed.id)) {
+    if (!feed || feed.removed || !user.hasAccessToFeed(feed.id)) {
       throw new Error('Feed not found');
     }
     return feed.users;
@@ -62,6 +66,16 @@ class FeedService {
     return this.#feedRepo.findOne({ id });
   };
 
+  public list = async (user: UserModel) => {
+    if (!user.admin) {
+      throw new AuthenticationError('unauthorized');
+    }
+    const feeds = await this.#feedRepo.find({
+      removed: IsNull(),
+    });
+    return feeds;
+  }
+
   public addUserToFeed = async (
     feedId: string,
     userId: string,
@@ -75,6 +89,7 @@ class FeedService {
     }
     if (
       !feed ||
+      feed.removed ||
       !user.hasAccessToFeed(feed.id, [
         UserFeedAccessType.Admin,
         UserFeedAccessType.Moderator,
@@ -101,6 +116,7 @@ class FeedService {
     }
     if (
       !feed ||
+      feed.removed ||
       !user.hasAccessToFeed(feed.id, [
         UserFeedAccessType.Admin,
         UserFeedAccessType.Moderator,
@@ -113,6 +129,18 @@ class FeedService {
       feed,
     });
   };
+
+  public remove = async (feedId: string, user: UserModel) => {
+    if (!user.admin) {
+      throw new AuthenticationError('unauthorized');
+    }
+    const target = await this.getFeedById(feedId, user);
+    if (!target) {
+      throw new Error('feed not found');
+    }
+    target.removed = new Date();
+    this.#feedRepo.save(target);
+  }
 }
 
 export { FeedService };

@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { ContainerInstance } from 'typedi';
 import { MediaService } from '../services/media';
 import { UserService } from '../services/users';
+import { Config } from '../config';
 
 const asyncEndpoint =
   (
@@ -22,6 +23,7 @@ const createApi = (container: ContainerInstance) => {
   const app = express();
   const mediaService = container.get(MediaService);
   const userService = container.get(UserService);
+  const config = container.get(Config);
 
   app.use(
     cors({
@@ -65,7 +67,11 @@ const createApi = (container: ContainerInstance) => {
   });
 
   app.get('/config', (_, res) => {
-    res.json({});
+    res.json({
+      notifications: {
+        push: !!config.expoAccessToken,
+      }
+    });
   });
 
   app.post(

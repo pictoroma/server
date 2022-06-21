@@ -34,6 +34,18 @@ class UserResolver {
     return token;
   }
 
+  @Mutation(() => Boolean)
+  public async removeUser(
+    @Ctx() { user }: Context,
+    @Arg('userId', () => String) userId: string
+  ) {
+    if (!user) {
+      throw new AuthenticationError('unauthorized');
+    }
+    await this.#userService.remove(userId, user);
+    return true;
+  }
+
   @Mutation(() => UserModel)
   public async setProfileAvatar(
     @Ctx() { user }: Context,

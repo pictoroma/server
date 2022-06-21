@@ -32,6 +32,10 @@ class PostModel {
   @Field(() => FeedModel)
   public feed!: FeedModel;
 
+  @Column({ name: 'removed', nullable: true })
+  @Field({ nullable: true })
+  public removed?: Date;
+
   @Column({ name: 'created_at' })
   @Field()
   public created!: Date;

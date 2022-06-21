@@ -32,6 +32,10 @@ class MediaModel {
   @Field()
   public size!: number;
 
+  @Column({ name: 'removed', nullable: true })
+  @Field({ nullable: true })
+  public removed?: Date;
+
   @ManyToOne(() => UserModel)
   @JoinColumn({ name: 'creator_id' })
   @Field(() => UserModel)
