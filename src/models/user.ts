@@ -35,11 +35,18 @@ class UserModel {
   @Field({ nullable: true })
   public avatar?: string;
 
+  @Column({ name: 'removed', nullable: true })
+  @Field({ nullable: true })
+  public removed?: Date;
+
   @OneToMany(() => UserFeedRelationModel, relation => relation.user)
   @Field(() => [UserFeedRelationModel])
   public feeds!: UserFeedRelationModel[];
 
   public hasAccessToFeed = (id: string, accessTypes?: UserFeedAccessType[]) => {
+    if (this.admin) {
+      return true;
+    }
     const access = this.feeds.find(feed => feed.feed.id === id);
     if (!access) {
       return false;

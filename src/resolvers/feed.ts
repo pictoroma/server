@@ -38,6 +38,15 @@ class FeedResolver {
     return user.feeds.map(relation => relation.feed);
   }
 
+  @Query(() => [FeedModel])
+  public async allFeeds(@Ctx() { user }: Context) {
+    if (!user) {
+      throw new AuthenticationError('unauthorized');
+    }
+    const feeds = this.#feedService.list(user);
+    return feeds;
+  }
+
   @Query(() => FeedModel)
   public async feed(
     @Arg('id', () => String) id: string,
@@ -85,6 +94,18 @@ class FeedResolver {
     const feed = await this.#feedService.create(name, user);
 
     return feed;
+  }
+
+  @Mutation(() => Boolean)
+  public async removeFeed(
+    @Arg('feedId') feedId: string,
+    @Ctx() { user }: Context
+  ) {
+    if (!user || !user.admin) {
+      throw new Error('Unauthroized');
+    }
+    await this.#feedService.remove(feedId, user);
+    return true;
   }
 
   @Mutation(() => UserFeedRelationModel)

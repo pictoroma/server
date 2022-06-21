@@ -1,11 +1,12 @@
 import { Service } from 'typedi';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { Connection, Repository } from 'typeorm';
+import { Connection, IsNull, Not, Repository } from 'typeorm';
 import { UserModel } from '../models/user';
 import { Config } from '../config';
 import { nanoid } from 'nanoid';
 import { EmailService } from './emails';
+import { AuthenticationError } from 'apollo-server-express';
 
 type Session = {
   userId: string;
@@ -30,7 +31,10 @@ class UserService {
   public getUserFromToken = async (token: string) => {
     const tokenData = jwt.verify(token, this.#config.jwtSecret) as Session;
     const user = this.#userRepo.findOne(
-      { id: tokenData.userId },
+      {
+        id: tokenData.userId,
+        removed: IsNull(),
+      },
       {
         relations: ['feeds', 'feeds.feed'],
       }
@@ -39,12 +43,17 @@ class UserService {
   };
 
   public getById = async (id: string) => {
-    const user = await this.#userRepo.findOne({ id });
+    const user = await this.#userRepo.findOne({
+      id,
+      removed: IsNull(),
+    });
     return user;
   };
 
   public find = async () => {
-    const users = await this.#userRepo.find();
+    const users = await this.#userRepo.find({
+      removed: IsNull(),
+    });
     return users;
   };
 
@@ -56,7 +65,10 @@ class UserService {
   };
 
   public createAuthToken = async (username: string, secret: string) => {
-    const user = await this.#userRepo.findOne({ username });
+    const user = await this.#userRepo.findOne({
+      username,
+      removed: IsNull(),
+    });
     if (!user || !user.secret) {
       throw new Error('Invalid');
     }
@@ -103,7 +115,7 @@ class UserService {
       Click <a href="${link}">this link</a> or copy paste ${link} into you phones browser to accept the invitation.
   </p>
   <p>
-    Pick your username and you are in!
+    Pick your username and password and you are in!
   </p>`
 
 
@@ -119,6 +131,7 @@ class UserService {
   ) => {
     const invitedUser = await this.#userRepo.findOne({
       creationToken,
+      removed: IsNull(),
     });
     if (!invitedUser) {
       throw new Error('Invitation does not exist');
@@ -129,6 +142,18 @@ class UserService {
     invitedUser.secret = await bcrypt.hash(secret, 10);
     return this.#userRepo.save(invitedUser);
   };
+
+  public remove = async (userId: string, user: UserModel) => {
+    if (!user.admin) {
+      throw new AuthenticationError('unauthorized');
+    }
+    const target = await this.getById(userId);
+    if (!target) {
+      throw new Error('user not found');
+    }
+    target.removed = new Date();
+    this.#userRepo.save(target);
+  }
 }
 
 export { UserService };
